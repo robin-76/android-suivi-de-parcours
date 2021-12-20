@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Menu">
+
+    <TextView
+        android:id="@+id/tvMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:gravity="center"
+        android:text="Choisissez votre mode !"
+        android:textSize="34sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/marcheur"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvMode"
+        android:layout_marginTop="100dp"
+        android:height="60dp"
+        android:onClick="marcheur"
+        android:text="Marcheur" />
+
+
+    <Button
+        android:id="@+id/suiveur"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/marcheur"
+        android:layout_marginTop="50dp"
+        android:height="60dp"
+        android:onClick="suiveur"
+        android:text="Suiveur" />
+
+</RelativeLayout>
