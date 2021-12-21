@@ -15,4 +15,12 @@
         android:textSize="20sp"
         android:textStyle="bold" />
 
+    <fragment
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/numero"
+        android:layout_marginTop="20dp"/>
+
 </RelativeLayout>
