@@ -1,20 +1,28 @@
 package com.example.suivideparcours;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class Suiveur extends AppCompatActivity implements OnMapReadyCallback {
+public class Suiveur extends AppCompatActivity
+        implements GoogleMap.OnMyLocationChangeListener,
+        OnMapReadyCallback {
 
     TextView tv;
+    GoogleMap map;
+    Location initialPosition = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,11 +40,30 @@ public class Suiveur extends AppCompatActivity implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(0, 0))
-                .title("Marker"));
+        map = googleMap;
+        map.setMyLocationEnabled(true);
+        map.setOnMyLocationChangeListener(this);
+    }
+
+    @Override
+    public void onMyLocationChange(@NonNull Location location) {
+        if(initialPosition == null){
+            map.clear();
+            MarkerOptions mp = new MarkerOptions();
+            mp.position(new LatLng(location.getLatitude(), location.getLongitude()));
+            mp.title("Départ");
+            map.addMarker(mp);
+        }
+
+        initialPosition = location;
+
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(location.getLatitude(), location.getLongitude()), 16));
+
+        //   System.out.println("Vitesse :"+location.getSpeed()*3.6);
     }
 }
 

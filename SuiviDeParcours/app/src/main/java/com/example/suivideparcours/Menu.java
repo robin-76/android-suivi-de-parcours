@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.PhoneNumberFormattingTextWatcher;
-import android.text.InputFilter;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
