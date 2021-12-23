@@ -1,7 +1,15 @@
 package com.example.suivideparcours;
 
-import android.annotation.SuppressLint;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,24 +20,24 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+public class Marcheur extends AppCompatActivity
+        implements
+        SensorEventListener,
+        GoogleMap.OnMyLocationChangeListener,
+        OnMapReadyCallback,
+        ActivityCompat.OnRequestPermissionsResultCallback {
 
-import java.util.ArrayList;
-
-public class Marcheur extends AppCompatActivity implements SensorEventListener,
-        GoogleMap.OnMyLocationChangeListener, OnMapReadyCallback {
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private boolean permissionDenied = false;
+    private GoogleMap map;
 
     TextView tvPas, tvVitesse, tvDistance, tvVitesseMoyenne;
     SensorManager sensorManager;
     Sensor stepSensor;
     float steps = 0;
-    GoogleMap map;
     Location initialPosition = null;
     double somme = 0;
     int nb = 0;
@@ -47,8 +55,8 @@ public class Marcheur extends AppCompatActivity implements SensorEventListener,
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
@@ -64,7 +72,6 @@ public class Marcheur extends AppCompatActivity implements SensorEventListener,
         sensorManager.unregisterListener(this, stepSensor);
     }
 
-
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
@@ -78,12 +85,46 @@ public class Marcheur extends AppCompatActivity implements SensorEventListener,
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
-    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        map.setMyLocationEnabled(true);
+        enableMyLocation();
         map.setOnMyLocationChangeListener(this);
+    }
+
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            if (map != null)
+                map.setMyLocationEnabled(true);
+        } else
+            PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION, true);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE)
+            return;
+
+        if (PermissionUtils.isPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION))
+            enableMyLocation();
+        else
+            permissionDenied = true;
+    }
+
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+        if (permissionDenied) {
+            showMissingPermissionError();
+            permissionDenied = false;
+        }
+    }
+
+    private void showMissingPermissionError() {
+        PermissionUtils.PermissionDeniedDialog
+                .newInstance(true).show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
@@ -107,6 +148,5 @@ public class Marcheur extends AppCompatActivity implements SensorEventListener,
         nb++;
         tvVitesseMoyenne.setText("Vitesse moyenne : "+ String.format("%.2f", somme / nb)+" km/h");
     }
+
 }
-
-
