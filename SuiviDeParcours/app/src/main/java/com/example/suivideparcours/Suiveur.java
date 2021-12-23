@@ -1,6 +1,5 @@
 package com.example.suivideparcours;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -49,7 +48,7 @@ public class Suiveur extends AppCompatActivity
     }
 
     @Override
-    public void onMyLocationChange(@NonNull Location location) {
+    public void onMyLocationChange(Location location) {
         if(initialPosition == null){
             map.clear();
             MarkerOptions mp = new MarkerOptions();
@@ -62,8 +61,6 @@ public class Suiveur extends AppCompatActivity
 
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(location.getLatitude(), location.getLongitude()), 16));
-
-        //   System.out.println("Vitesse :"+location.getSpeed()*3.6);
     }
 }
 

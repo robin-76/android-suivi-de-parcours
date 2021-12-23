@@ -1,12 +1,5 @@
 package com.example.suivideparcours;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -15,23 +8,29 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class Marcheur extends AppCompatActivity
         implements
         SensorEventListener,
         GoogleMap.OnMyLocationChangeListener,
-        OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+        OnMapReadyCallback {
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private boolean permissionDenied = false;
+    private static final int PERMISSION_FOR_LOCATION = 1;
     private GoogleMap map;
 
     TextView tvPas, tvVitesse, tvDistance, tvVitesseMoyenne;
@@ -88,47 +87,49 @@ public class Marcheur extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        enableMyLocation();
+        verifyPermissions();
         map.setOnMyLocationChangeListener(this);
     }
 
-    private void enableMyLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            if (map != null)
-                map.setMyLocationEnabled(true);
-        } else
-            PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
-                    Manifest.permission.ACCESS_FINE_LOCATION, true);
+    public void localizeMe(){
+        map.setMyLocationEnabled(true);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE)
-            return;
-
-        if (PermissionUtils.isPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION))
-            enableMyLocation();
+    public void verifyPermissions() {
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1)
+            localizeMe();
+        if((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED)
+                || (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED))
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_FOR_LOCATION);
         else
-            permissionDenied = true;
-    }
+            localizeMe();
+        }
 
     @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-        if (permissionDenied) {
-            showMissingPermissionError();
-            permissionDenied = false;
+    public void onRequestPermissionsResult(int code, String permissions[], int grantResults[]) {
+        switch (code) {
+            case PERMISSION_FOR_LOCATION: {
+                boolean ok = true;
+                if(grantResults.length > 0) {
+                    for(int res=0; res<grantResults.length; res++) {
+                        if(grantResults[res] != PackageManager.PERMISSION_GRANTED)
+                            ok = false;
+                    }
+                } else ok = false;
+                if(ok)
+                    localizeMe();
+                else
+                    Toast.makeText(this, "Localisation non autorisée", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
-    private void showMissingPermissionError() {
-        PermissionUtils.PermissionDeniedDialog
-                .newInstance(true).show(getSupportFragmentManager(), "dialog");
-    }
-
     @Override
-    public void onMyLocationChange(@NonNull Location location) {
+    public void onMyLocationChange(Location location) {
         if(initialPosition == null){
             initialPosition = location;
 
