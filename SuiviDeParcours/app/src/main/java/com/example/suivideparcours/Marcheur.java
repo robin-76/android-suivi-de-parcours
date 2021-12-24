@@ -11,6 +11,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +39,7 @@ public class Marcheur extends AppCompatActivity
     private static final int PERMISSION_FOR_LOCATION = 1;
     private GoogleMap map;
 
-    TextView tvPas, tvVitesse, tvDistance, tvVitesseMoyenne;
+    TextView tvPas, tvVitesse, tvDistance, tvVitesseMoyenne, tvStop;
     SensorManager sensorManager;
     Sensor stepSensor;
     float steps = 0, distance = 0, vitesseMoyenne = 0;
@@ -55,6 +56,7 @@ public class Marcheur extends AppCompatActivity
         tvVitesse = findViewById(R.id.vitesse);
         tvDistance = findViewById(R.id.distance);
         tvVitesseMoyenne = findViewById(R.id.vitesseMoyenne);
+        tvStop = findViewById(R.id.buttonStop);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
@@ -62,6 +64,7 @@ public class Marcheur extends AppCompatActivity
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        mapFragment.getView().setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -74,18 +77,6 @@ public class Marcheur extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         sensorManager.unregisterListener(this, stepSensor);
-
-        SharedPreferences prefs = this.getSharedPreferences("myPrefsKey", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Date date = new Date();
-        int nb = prefs.getInt("size",0);
-        editor.putInt("size",nb+1);
-        editor.putInt("pas_"+nb, (int)steps);
-        editor.putFloat("distance_"+nb, distance);
-        editor.putFloat("vitesseMoyenne"+nb, vitesseMoyenne);
-        editor.putString("date_"+nb, dateFormat.format(date));
-        editor.apply();
     }
 
     @Override
@@ -168,6 +159,22 @@ public class Marcheur extends AppCompatActivity
         nb++;
         vitesseMoyenne = (float) (somme/nb);
         tvVitesseMoyenne.setText("Vitesse moyenne : "+ String.format("%.2f", vitesseMoyenne)+" km/h");
+    }
+
+    public void buttonStop(View v) {
+        SharedPreferences prefs = this.getSharedPreferences("myPrefsKey", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        Date date = new Date();
+        int nb = prefs.getInt("size",0);
+        editor.putInt("size",nb+1);
+        editor.putInt("pas_"+nb, (int)steps);
+        editor.putFloat("distance_"+nb, distance);
+        editor.putFloat("vitesseMoyenne"+nb, vitesseMoyenne);
+        editor.putString("date_"+nb, dateFormat.format(date));
+        editor.apply();
+
+        this.finish();
     }
 
 }
