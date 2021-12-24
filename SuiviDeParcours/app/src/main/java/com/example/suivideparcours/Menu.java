@@ -27,22 +27,33 @@ public class Menu extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
+        verifyPermissions();
     }
 
     public void verifyPermissions() {
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            dialog.dismiss();
-            dialog.setOnShowListener(dialog1 -> ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true));
-            dialog.show();
+            if(dialog!=null){
+                dialog.dismiss();
+                dialog.setOnShowListener(dialog1 -> ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true));
+                dialog.show();
+            }
         }
-        if((ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+        if((ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)
+                != PackageManager.PERMISSION_GRANTED)
+                || (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
+                != PackageManager.PERMISSION_GRANTED)
+                || (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED))
             ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.RECEIVE_SMS,
+                    Manifest.permission.READ_SMS,
                     Manifest.permission.SEND_SMS}, PERMISSION_FOR_SMS);
         else {
-            dialog.dismiss();
-            dialog.setOnShowListener(dialog1 -> ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true));
-            dialog.show();
+            if(dialog!=null) {
+                dialog.dismiss();
+                dialog.setOnShowListener(dialog1 -> ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true));
+                dialog.show();
+            }
         }
     }
 
@@ -59,15 +70,20 @@ public class Menu extends AppCompatActivity {
                 } else ok = false;
                 if(ok) {
                     Toast.makeText(this, "SMS autorisée", Toast.LENGTH_LONG).show();
-                    dialog.dismiss();
-                    dialog.setOnShowListener(dialog1 -> ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true));
+                    if(dialog!=null) {
+                        dialog.dismiss();
+                        dialog.setOnShowListener(dialog1 -> ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true));
+                        dialog.show();
+                    }
                 }
                 else {
                     Toast.makeText(this, "SMS non autorisée", Toast.LENGTH_LONG).show();
-                    dialog.dismiss();
-                    dialog.setOnShowListener(dialog1 -> ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false));
+                    if(dialog!=null) {
+                        dialog.dismiss();
+                        dialog.setOnShowListener(dialog1 -> ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false));
+                        dialog.show();
+                    }
                 }
-                dialog.show();
             }
         }
     }
@@ -93,11 +109,10 @@ public class Menu extends AppCompatActivity {
             numeroMarcheur = input.getText().toString();
 
             Intent smsIntent = new Intent(Intent.ACTION_VIEW);
-
             smsIntent.setData(Uri.parse("smsto:"));
             smsIntent.setType("vnd.android-dir/mms-sms");
             smsIntent.putExtra("address"  , numeroMarcheur);
-            smsIntent.putExtra("sms_body"  , "Puis-je suivre ton parcours ? Oui | Non");
+            smsIntent.putExtra("sms_body"  , "Puis-je suivre votre parcours ? Oui | Non");
 
             try {
                 startActivity(smsIntent);
