@@ -2,6 +2,7 @@ package com.example.suivideparcours;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -24,6 +25,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Marcheur extends AppCompatActivity
         implements
         SensorEventListener,
@@ -36,7 +41,7 @@ public class Marcheur extends AppCompatActivity
     TextView tvPas, tvVitesse, tvDistance, tvVitesseMoyenne;
     SensorManager sensorManager;
     Sensor stepSensor;
-    float steps = 0;
+    float steps = 0, distance = 0, vitesseMoyenne = 0;
     Location initialPosition = null;
     double somme = 0;
     int nb = 0;
@@ -69,6 +74,18 @@ public class Marcheur extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         sensorManager.unregisterListener(this, stepSensor);
+
+        SharedPreferences prefs = this.getSharedPreferences("myPrefsKey", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        Date date = new Date();
+        int nb = prefs.getInt("size",0);
+        editor.putInt("size",nb+1);
+        editor.putInt("pas_"+nb, (int)steps);
+        editor.putFloat("distance_"+nb, distance);
+        editor.putFloat("vitesseMoyenne"+nb, vitesseMoyenne);
+        editor.putString("date_"+nb, dateFormat.format(date));
+        editor.apply();
     }
 
     @Override
@@ -76,7 +93,7 @@ public class Marcheur extends AppCompatActivity
         if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
             steps++;
             tvPas.setText("Nombre de pas : "+(int)steps);
-            float distance = (steps*78) / 100;
+            distance = (steps*78) / 100;
             tvDistance.setText("Distance : "+String.format("%.2f", distance)+" m");
         }
     }
@@ -87,6 +104,8 @@ public class Marcheur extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(46.62, 1.85), 5)); // Centre de la France
         verifyPermissions();
         map.setOnMyLocationChangeListener(this);
     }
@@ -147,7 +166,8 @@ public class Marcheur extends AppCompatActivity
 
         somme += location.getSpeed()*3.6;
         nb++;
-        tvVitesseMoyenne.setText("Vitesse moyenne : "+ String.format("%.2f", somme / nb)+" km/h");
+        vitesseMoyenne = (float) (somme/nb);
+        tvVitesseMoyenne.setText("Vitesse moyenne : "+ String.format("%.2f", vitesseMoyenne)+" km/h");
     }
 
 }

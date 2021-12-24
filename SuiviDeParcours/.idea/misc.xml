@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/robin/AndroidStudioProjects/SuiviDeParcours/app/src/main/res/layout/activity_historique.xml" value="0.1" />
         <entry key="..\:/Users/robin/AndroidStudioProjects/SuiviDeParcours/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Users/robin/AndroidStudioProjects/SuiviDeParcours/app/src/main/res/layout/activity_marcheur.xml" value="0.20364583333333333" />
+        <entry key="..\:/Users/robin/AndroidStudioProjects/SuiviDeParcours/app/src/main/res/layout/activity_menu.xml" value="0.20364583333333333" />
       </map>
     </option>
   </component>

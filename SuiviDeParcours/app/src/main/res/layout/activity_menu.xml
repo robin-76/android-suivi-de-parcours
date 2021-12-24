@@ -10,7 +10,7 @@
         android:id="@+id/tvMode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="10dp"
         android:gravity="center"
         android:text="Choisissez votre mode !"
         android:textSize="34sp"
@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/tvMode"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="30dp"
         android:height="60dp"
         android:onClick="marcheur"
         android:text="Marcheur" />
@@ -38,10 +38,20 @@
         android:text="Suiveur" />
 
     <Button
-        android:id="@+id/quit"
+        android:id="@+id/historique"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/suiveur"
+        android:layout_marginTop="50dp"
+        android:height="60dp"
+        android:onClick="historique"
+        android:text="Historique" />
+
+    <Button
+        android:id="@+id/quit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/historique"
         android:layout_marginTop="50dp"
         android:height="60dp"
         android:text="Quitter"

@@ -49,6 +49,11 @@ public class Menu extends AppCompatActivity {
         builder.show();
     }
 
+    public void historique(View v) {
+        Intent intentHistorique = new Intent(this,Historique.class);
+        startActivity(intentHistorique);
+    }
+
     public void quit(View v) {
         this.finish();
     }

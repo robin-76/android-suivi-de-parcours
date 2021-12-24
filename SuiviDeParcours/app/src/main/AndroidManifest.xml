@@ -19,6 +19,7 @@
             android:value="${MAPS_API_KEY}" />
         <activity android:name=".Marcheur" />
         <activity android:name=".Suiveur" />
+        <activity android:name=".Historique" />
         <activity
             android:name=".Menu"
             android:exported="true">
