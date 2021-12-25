@@ -122,9 +122,6 @@ public class Menu extends AppCompatActivity {
                         "SMS failed, please try again later.", Toast.LENGTH_SHORT).show();
             }
 
-            /*Intent intentSuiveur = new Intent(this,Suiveur.class);
-            intentSuiveur.putExtra("numeroMarcheur",numeroMarcheur);
-            startActivity(intentSuiveur);*/
         });
 
         dialog = builder.create();
