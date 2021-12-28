@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 public class SMSBroadcast extends BroadcastReceiver {
     private static String SMS = "android.provider.Telephony.SMS_RECEIVED";
+    SmsMessage messages;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -17,15 +18,16 @@ public class SMSBroadcast extends BroadcastReceiver {
 
             Object[] objects = (Object[]) bundle.get("pdus");
 
-            SmsMessage messages = null;
-
             for(int i=0; i<objects.length; i++)
                 messages = SmsMessage.createFromPdu((byte[]) objects[i]);
 
-            if(messages.getMessageBody().equals("Oui")){
-                Toast.makeText(context, "Vous pouvez suivre mon parcours",
-                        Toast.LENGTH_SHORT).show();
+            if(messages.getMessageBody().equals("Puis-je suivre votre parcours ?")) {
+                Intent intentNumeroSuiveur = new Intent("numeroSuiveur");
+                intentNumeroSuiveur.putExtra("numeroSuiveur",messages.getDisplayOriginatingAddress());
+                context.sendBroadcast(intentNumeroSuiveur);
+            }
 
+            else if(messages.getMessageBody().equals("Oui")){
                 Intent intentSuiveur = new Intent(context,Suiveur.class);
                 intentSuiveur.putExtra("numeroMarcheur",messages.getDisplayOriginatingAddress());
                 intentSuiveur.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -33,11 +35,28 @@ public class SMSBroadcast extends BroadcastReceiver {
             }
 
             else if(messages.getMessageBody().equals("Non"))
-                Toast.makeText(context, "Vous ne pouvez pas suivre mon parcours",
+                Toast.makeText(context, "Vous ne pouvez pas suivre le marcheur",
                         Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(context, "Réponse incorrecte",
+
+            else if(messages.getMessageBody().contains("Position;")){
+                String[] latLong = messages.getMessageBody().split(";");
+                double latitude = Double.parseDouble(latLong[1]);
+                double longitude = Double.parseDouble(latLong[2]);
+
+                Intent i = new Intent("position");
+                i.putExtra("latitude",latitude);
+                i.putExtra("longitude",longitude);
+                context.sendBroadcast(i);
+            }
+
+            else if(messages.getMessageBody().equals("Stop")){
+                Toast.makeText(context, "Fin de suivi",
                         Toast.LENGTH_SHORT).show();
+
+                Intent intentStop = new Intent("reponse");
+                intentStop.putExtra("reponse",false);
+                context.sendBroadcast(intentStop);
+            }
         }
     }
 }

@@ -8,10 +8,10 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.telephony.PhoneNumberFormattingTextWatcher;
+import android.telephony.SmsManager;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
@@ -108,18 +108,19 @@ public class Menu extends AppCompatActivity {
         builder.setPositiveButton("OK", (dialog, which) -> {
             numeroMarcheur = input.getText().toString();
 
-            Intent smsIntent = new Intent(Intent.ACTION_VIEW);
-            smsIntent.setData(Uri.parse("smsto:"));
-            smsIntent.setType("vnd.android-dir/mms-sms");
-            smsIntent.putExtra("address"  , numeroMarcheur);
-            smsIntent.putExtra("sms_body"  , "Puis-je suivre votre parcours ? Oui | Non");
-
             try {
-                startActivity(smsIntent);
-                finish();
-            } catch (android.content.ActivityNotFoundException ex) {
-                Toast.makeText(Menu.this,
-                        "SMS failed, please try again later.", Toast.LENGTH_SHORT).show();
+                SmsManager smsManager = SmsManager.getDefault();
+                smsManager.sendTextMessage(numeroMarcheur,
+                        null,
+                        "Puis-je suivre votre parcours ?",
+                        null,
+                        null);
+
+                Toast.makeText(getApplicationContext(),"Votre sms a bien été envoyé",
+                        Toast.LENGTH_LONG).show();
+            } catch (Exception ex) {
+                Toast.makeText(getApplicationContext(),"Votre sms a échoué... " + ex.getMessage(),
+                        Toast.LENGTH_LONG).show();
             }
 
         });

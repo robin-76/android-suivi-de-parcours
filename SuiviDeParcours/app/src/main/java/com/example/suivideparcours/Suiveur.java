@@ -2,18 +2,22 @@ package com.example.suivideparcours;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -25,13 +29,14 @@ import java.util.Date;
 import java.util.List;
 
 public class Suiveur extends AppCompatActivity
-        implements GoogleMap.OnMyLocationChangeListener,
-        OnMapReadyCallback {
+        implements OnMapReadyCallback {
 
     TextView tv;
     GoogleMap map;
     Polyline polyline;
-    Location initialPosition = null;
+    boolean initialPosition = false;
+    double latitude, longitude;
+    String numeroMarcheur;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +44,7 @@ public class Suiveur extends AppCompatActivity
         setContentView(R.layout.activity_suiveur);
 
         Intent intentAppelant = getIntent();
-        String numeroMarcheur = intentAppelant.getStringExtra("numeroMarcheur");
+        numeroMarcheur = intentAppelant.getStringExtra("numeroMarcheur");
 
         tv = findViewById(R.id.numero);
         tv.setText("Suivi de : "+numeroMarcheur);
@@ -47,9 +52,51 @@ public class Suiveur extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        broadcastReceiver();
     }
 
-    @SuppressLint("MissingPermission")
+    public void broadcastReceiver() {
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                Bundle intentAppelant = intent.getExtras();
+                if (action.equals("position")) {
+                    latitude = intentAppelant.getDouble("latitude");
+                    longitude = intentAppelant.getDouble("longitude");
+
+                    if(initialPosition == false) {
+                        MarkerOptions mp = new MarkerOptions();
+                        mp.position(new LatLng(latitude, longitude));
+                        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                        Date date = new Date();
+                        mp.title("Début du suivi ("+dateFormat.format(date)+")");
+                        map.addMarker(mp);
+                    }
+
+                    initialPosition = true;
+
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(latitude, longitude), 18));
+
+                    MarkerOptions mp = new MarkerOptions();
+                    mp.position(new LatLng(latitude, longitude));
+                    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                    Date date = new Date();
+                    mp.title("Position du marcheur ("+dateFormat.format(date)+")");
+                    mp.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                    map.addMarker(mp);
+
+                    List<LatLng> points = polyline.getPoints();
+                    points.add(new LatLng(latitude, longitude));
+                    polyline.setPoints(points);
+                }
+            }
+        };
+        registerReceiver(broadcastReceiver, new IntentFilter("position"));
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
@@ -59,33 +106,20 @@ public class Suiveur extends AppCompatActivity
                 .geodesic(true);
 
         polyline = map.addPolyline(polylineOpts);
-
-        map.setMyLocationEnabled(true);
-        map.setOnMyLocationChangeListener(this);
-    }
-
-    @Override
-    public void onMyLocationChange(Location location) {
-        if(initialPosition == null){
-            MarkerOptions mp = new MarkerOptions();
-            mp.position(new LatLng(location.getLatitude(), location.getLongitude()));
-            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            Date date = new Date();
-            mp.title("Départ ("+dateFormat.format(date)+")");
-            map.addMarker(mp);
-        }
-
-        initialPosition = location;
-
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(location.getLatitude(), location.getLongitude()), 16));
-
-        List<LatLng> points = polyline.getPoints();
-        points.add(new LatLng(location.getLatitude(), location.getLongitude()));
-        polyline.setPoints(points);
     }
 
     public void buttonStop(View v) {
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(numeroMarcheur,
+                    null,
+                    "Stop",
+                    null,
+                    null);
+        } catch (Exception ex) {
+            Toast.makeText(getApplicationContext(),"Votre sms a échoué... " + ex.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        }
         this.finish();
     }
 }
