@@ -1,5 +1,11 @@
 package com.example.suivideparcours;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.READ_SMS;
+import static android.Manifest.permission.RECEIVE_SMS;
+import static android.Manifest.permission.SEND_SMS;
+
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -186,7 +192,9 @@ public class Marcheur extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        verifyPermissions();
+
+        if(!checkPermission())
+            verifyPermissions();
 
         if(!isLocationEnabled(Marcheur.this)){
             AlertDialog.Builder builder = new AlertDialog.Builder(Marcheur.this);
@@ -219,6 +227,12 @@ public class Marcheur extends AppCompatActivity
 
     public void localizeMe(){
         map.setMyLocationEnabled(true);
+    }
+
+    private boolean checkPermission() {
+        int permission1 = ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_COARSE_LOCATION);
+        int permission2 = ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION);
+        return permission1 == PackageManager.PERMISSION_GRANTED && permission2 == PackageManager.PERMISSION_GRANTED;
     }
 
     public void verifyPermissions() {

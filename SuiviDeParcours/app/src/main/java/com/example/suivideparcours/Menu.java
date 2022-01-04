@@ -1,5 +1,11 @@
 package com.example.suivideparcours;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.READ_SMS;
+import static android.Manifest.permission.RECEIVE_SMS;
+import static android.Manifest.permission.SEND_SMS;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -27,7 +33,17 @@ public class Menu extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
-        verifyPermissions();
+
+        if (!checkPermission())
+            verifyPermissions();
+    }
+
+    private boolean checkPermission() {
+        int permission1 = ContextCompat.checkSelfPermission(getApplicationContext(), RECEIVE_SMS);
+        int permission2 = ContextCompat.checkSelfPermission(getApplicationContext(), READ_SMS);
+        int permission3 = ContextCompat.checkSelfPermission(getApplicationContext(), SEND_SMS);
+        return permission1 == PackageManager.PERMISSION_GRANTED && permission2 == PackageManager.PERMISSION_GRANTED
+                && permission3 == PackageManager.PERMISSION_GRANTED;
     }
 
     public void verifyPermissions() {
