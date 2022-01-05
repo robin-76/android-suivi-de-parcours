@@ -75,18 +75,20 @@ public class Suiveur extends AppCompatActivity
                         map.addMarker(mp);
                     }
 
+                    else {
+                        MarkerOptions mp = new MarkerOptions();
+                        mp.position(new LatLng(latitude, longitude));
+                        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                        Date date = new Date();
+                        mp.title("Position du marcheur ("+dateFormat.format(date)+")");
+                        mp.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                        map.addMarker(mp);
+                    }
+
                     initialPosition = true;
 
                     map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(latitude, longitude), 18));
-
-                    MarkerOptions mp = new MarkerOptions();
-                    mp.position(new LatLng(latitude, longitude));
-                    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                    Date date = new Date();
-                    mp.title("Position du marcheur ("+dateFormat.format(date)+")");
-                    mp.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-                    map.addMarker(mp);
 
                     List<LatLng> points = polyline.getPoints();
                     points.add(new LatLng(latitude, longitude));

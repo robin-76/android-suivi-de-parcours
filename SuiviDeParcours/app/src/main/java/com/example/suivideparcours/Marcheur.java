@@ -193,8 +193,7 @@ public class Marcheur extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
 
-        if(!checkPermission())
-            verifyPermissions();
+        verifyPermissions();
 
         if(!isLocationEnabled(Marcheur.this)){
             AlertDialog.Builder builder = new AlertDialog.Builder(Marcheur.this);
@@ -227,12 +226,6 @@ public class Marcheur extends AppCompatActivity
 
     public void localizeMe(){
         map.setMyLocationEnabled(true);
-    }
-
-    private boolean checkPermission() {
-        int permission1 = ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_COARSE_LOCATION);
-        int permission2 = ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION);
-        return permission1 == PackageManager.PERMISSION_GRANTED && permission2 == PackageManager.PERMISSION_GRANTED;
     }
 
     public void verifyPermissions() {
