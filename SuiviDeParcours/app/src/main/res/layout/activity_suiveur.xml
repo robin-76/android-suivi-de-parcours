@@ -17,13 +17,24 @@
         android:textStyle="bold" />
 
     <Button
-        android:id="@+id/buttonStop"
+        android:id="@+id/buttonScreen"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_centerInParent="true"
         android:layout_below="@id/numero"
-        android:layout_marginTop="10dp"
-        android:width="150dp"
+        android:layout_marginTop="8dp"
+        android:width="130dp"
+        android:onClick="buttonScreen"
+        android:text="Capture d'écran" />
+
+    <Button
+        android:id="@+id/buttonStop"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/buttonScreen"
+        android:layout_marginTop="8dp"
+        android:width="130dp"
         android:onClick="buttonStop"
         android:text="Stop" />
 
